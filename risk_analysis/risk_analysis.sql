@@ -283,7 +283,7 @@ WHERE Tax_Haven_Country_ID IS NOT NULL;
 
 /*
 The results revealed that 89% of tax haven transactions involve shell companies.
-
+*/
 -- Number of transactions and total amount from each country to tax havens:
 SELECT 
     c.country_name,
@@ -354,7 +354,8 @@ SELECT
     th.tax_haven_country_name,
     COUNT(*) AS Total_Transactions,
     FORMAT(SUM(Amount),0) AS Total_Transaction_Amount
-FROM transactions t JOIN transaction_type tt
+FROM transactions t 
+JOIN transaction_type tt
 ON t.Transaction_Type_ID = tt.Transaction_Type_ID
 JOIN tax_haven_country th
 ON t.Tax_Haven_Country_ID = th.Tax_Haven_Country_ID
@@ -373,8 +374,18 @@ Luxembourg and Switzerland, suggesting asset relocation and investment strategie
 digital assets, capital mobility, and asset shielding.
 */
 
-
-
+-- Percentage of high-risk transactions by transaction type in tax havens
+SELECT 
+  tt.transaction_type,
+  COUNT(*) AS Total_Transactions,
+  ROUND(COUNT(*) * 100.0 / SUM(COUNT(*)) OVER ()) AS Percentage
+FROM transactions t
+JOIN transaction_type tt ON t.Transaction_Type_ID = tt.Transaction_Type_ID
+JOIN tax_haven_country th ON t.Tax_Haven_Country_ID = th.Tax_Haven_Country_ID
+WHERE th.Tax_Haven_Country_Name IS NOT NULL
+AND Money_Laundering_Risk_Score >= 7
+GROUP BY tt.transaction_type
+ORDER BY Total_Transactions DESC;
 
 
 
